@@ -15,13 +15,18 @@ class Lachesis extends ZendProfiler
     private $enabled;
     private $logDir = 'data/kharon/lachesis';
     private $data;
+    private $extra;
 
-    public function __construct($enabled, $logDir = null)
+    public function __construct($config, $extra = [])
     {
-        $this->enabled = (bool) $enabled;
+        $this->enabled = (bool) $config['enabled'];
 
-        if ($logDir != null) {
-            $this->logDir = $logDir;
+        if (isset($config['log_dir'])) {
+            $this->logDir = $config['log_dir'];
+        }
+
+        if (!empty($extra)) {
+            $this->extra = $extra;
         }
     }
 
@@ -29,9 +34,6 @@ class Lachesis extends ZendProfiler
     {
         $ret = parent::profilerFinish();
         $profile = end($ret->getProfiles());
-        if (!$profile) {
-            return $ret;
-        }
         switch (strtolower(substr(ltrim($profile['sql']), 0, 6))) {
             case 'select':
                 $queryType = static::SELECT;
@@ -56,6 +58,9 @@ class Lachesis extends ZendProfiler
             'end'     => $profile['end'],
             'elapsed' => round($profile['elapse'] * 1000 * 1000), // in microseconds
         ];
+        if (!empty($this->extra)) {
+            $data = array_merge($this->extra, $data);
+        }
         if (isset($profile['parameters'])) {
             if ($profile['parameters'] instanceof ParameterContainer) {
                 $data['parameters'] = $profile['parameters']->getNamedArray();
