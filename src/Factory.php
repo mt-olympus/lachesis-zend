@@ -3,6 +3,7 @@ namespace Lachesis;
 
 use Zend\ServiceManager\FactoryInterface;
 use Zend\ServiceManager\ServiceLocatorInterface;
+use Zend\Db\Adapter\Adapter;
 
 class Factory implements FactoryInterface
 {
@@ -15,13 +16,14 @@ class Factory implements FactoryInterface
         $lachesisConfig = isset($config['lachesis']) ? $config['lachesis'] : [
             'enabled' => true,
         ];
-
-        $lachesis = new Lachesis($config['db']);
-
-        if (isset($lachesisConfig['log_dir'])) {
-            $lachesis->setLogDir($lachesisConfig['log_dir']);
+        if (!isset($lachesisConfig['log_dir'])) {
+            $lachesisConfig['log_dir'] = 'data/kharon/lachesis';
         }
 
-        return $lachesis;
+        $adapter = new Adapter($serviceLocator->get('config')['db']);
+        $adapter->setProfiler(new Lachesis($lachesisConfig['enabled'], $lachesisConfig['log_dir']));
+
+
+        return $adapter;
     }
 }
