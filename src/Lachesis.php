@@ -28,43 +28,44 @@ class Lachesis extends ZendProfiler
     public function profilerFinish()
     {
         $ret = parent::profilerFinish();
-        $profiles = $ret->getProfiles();
-        foreach ($profiles as $profile) {
-            switch (strtolower(substr(ltrim($profile['sql']), 0, 6))) {
-                case 'select':
-                    $queryType = static::SELECT;
-                    break;
-                case 'insert':
-                    $queryType = static::INSERT;
-                    break;
-                case 'update':
-                    $queryType = static::UPDATE;
-                    break;
-                case 'delete':
-                    $queryType = static::DELETE;
-                    break;
-                default:
-                    $queryType = static::QUERY;
-                    break;
-            }
-            $data = [
-                'type' => $queryType,
-                'sql'     => $profile['sql'],
-                'start'   => $profile['start'],
-                'end'     => $profile['end'],
-                'elapsed' => $profile['elapse'],
-            ];
-            if (isset($profile['parameters'])) {
-                if ($profile['parameters'] instanceof ParameterContainer) {
-                    $data['parameters'] = $profile['parameters']->getNamedArray();
-                } elseif (is_array($profile['parameters'])) {
-                    $data['parameters'] = $profile['parameters'];
-                }
-            }
-            $data['stack'] = debug_backtrace();
-
-            $logFile = $this->logDir . '/sql-' . getmypid() . '-' . microtime(true) . '.kharon';
-            file_put_contents($logFile, json_encode($data, null, 100));
+        $profile = end($ret->getProfiles());
+        if (!$profile) {
+            return $ret;
         }
+        switch (strtolower(substr(ltrim($profile['sql']), 0, 6))) {
+            case 'select':
+                $queryType = static::SELECT;
+                break;
+            case 'insert':
+                $queryType = static::INSERT;
+                break;
+            case 'update':
+                $queryType = static::UPDATE;
+                break;
+            case 'delete':
+                $queryType = static::DELETE;
+                break;
+            default:
+                $queryType = static::QUERY;
+                break;
+        }
+        $data = [
+            'type' => $queryType,
+            'sql'     => $profile['sql'],
+            'start'   => $profile['start'],
+            'end'     => $profile['end'],
+            'elapsed' => round($profile['elapse'] * 1000 * 1000), // in microseconds
+        ];
+        if (isset($profile['parameters'])) {
+            if ($profile['parameters'] instanceof ParameterContainer) {
+                $data['parameters'] = $profile['parameters']->getNamedArray();
+            } elseif (is_array($profile['parameters'])) {
+                $data['parameters'] = $profile['parameters'];
+            }
+        }
+        $data['stack'] = debug_backtrace();
+
+        $logFile = $this->logDir . '/sql-' . getmypid() . '-' . microtime(true) . '.kharon';
+        file_put_contents($logFile, json_encode($data, null, 100));
     }
 }
