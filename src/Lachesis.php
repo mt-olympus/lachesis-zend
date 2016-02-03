@@ -16,10 +16,12 @@ class Lachesis extends ZendProfiler
     private $logDir = 'data/kharon/lachesis';
     private $data;
     private $extra;
+    private $project = 0;
 
     public function __construct($config, $extra = [])
     {
-        $this->enabled = (bool) $config['enabled'];
+        $this->enabled = isset($config['enabled']) ? (bool) $config['enabled'] : true;
+        $this->project = isset($config['project']) ? (string) $config['project'] : 0;
 
         if (isset($config['log_dir'])) {
             $this->logDir = $config['log_dir'];
@@ -52,6 +54,7 @@ class Lachesis extends ZendProfiler
                 break;
         }
         $data = [
+            'project' => $this->project,
             'type' => $queryType,
             'sql'     => $profile['sql'],
             'start'   => $profile['start'],
