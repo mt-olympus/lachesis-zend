@@ -2,7 +2,7 @@
 return [
     'lachesis' => [
         'log_dir' => 'data/kharon/lachesis',
-        'project' => '',
+        'api_key' => '',
     ],
     'service_manager' => [
         'factories' => [
