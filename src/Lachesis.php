@@ -35,7 +35,8 @@ class Lachesis extends ZendProfiler
     public function profilerFinish()
     {
         $ret = parent::profilerFinish();
-        $profile = end($ret->getProfiles());
+        $profiles = $ret->getProfiles();
+        $profile = end($profiles);
         switch (strtolower(substr(ltrim($profile['sql']), 0, 6))) {
             case 'select':
                 $queryType = static::SELECT;
