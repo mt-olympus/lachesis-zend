@@ -34,6 +34,11 @@ class Factory implements FactoryInterface
     private function prepareData($request)
     {
         $data = [];
+
+        if (!method_exists($request, 'getHeader')) {
+            return $data;
+        }
+
         $header = $request->getHeader('X-Request-Id');
         if ($header) {
             $requestId = $header->getFieldValue();
