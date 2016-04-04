@@ -14,19 +14,22 @@ class Factory implements FactoryInterface
     {
         $config = $serviceLocator->get('config');
         $lachesisConfig = isset($config['lachesis']) ? $config['lachesis'] : [
-            'enabled' => true,
+            'enabled' => false,
         ];
         if (!isset($lachesisConfig['log_dir'])) {
             $lachesisConfig['log_dir'] = 'data/kharon/lachesis';
         }
 
+        $enabled = isset($config['lachesis']['enabled']) ? (bool) $config['lachesis']['enabled'] : false;
+
         $data = [];
-        if ($serviceLocator->has('Request')) {
+        if ($enabled && $serviceLocator->has('Request')) {
             $data = $this->prepareData($serviceLocator->get('Request'));
         }
         $adapter = new Adapter($serviceLocator->get('config')['db']);
-        $adapter->setProfiler(new Lachesis($lachesisConfig, $data));
-
+        if ($enabled) {
+            $adapter->setProfiler(new Lachesis($lachesisConfig, $data));
+        }
 
         return $adapter;
     }
