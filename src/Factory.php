@@ -1,18 +1,17 @@
 <?php
 namespace Lachesis;
 
-use Zend\ServiceManager\FactoryInterface;
-use Zend\ServiceManager\ServiceLocatorInterface;
 use Zend\Db\Adapter\Adapter;
+use Zend\ServiceManager\Factory\FactoryInterface;
+use Interop\Container\ContainerInterface;
 
 class Factory implements FactoryInterface
 {
-    /**
-     * {@inheritdoc}
-     */
-    public function createService(ServiceLocatorInterface $serviceLocator)
+    public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
     {
-        $config = $serviceLocator->get('config');
+        $config = $container->get('config');
+
+
         $lachesisConfig = isset($config['lachesis']) ? $config['lachesis'] : [
             'enabled' => false,
         ];
@@ -22,14 +21,16 @@ class Factory implements FactoryInterface
 
         $enabled = isset($config['lachesis']['enabled']) ? (bool) $config['lachesis']['enabled'] : false;
 
+        $adapter = new Adapter($config['db'] ?? []);
+        if ($enabled == false) {
+            return $adapter;
+        }
+
         $data = [];
-        if ($enabled && $serviceLocator->has('Request')) {
-            $data = $this->prepareData($serviceLocator->get('Request'));
+        if ($container->has('Request')) {
+            $data = $this->prepareData($container->get('Request'));
         }
-        $adapter = new Adapter($serviceLocator->get('config')['db']);
-        if ($enabled) {
-            $adapter->setProfiler(new Lachesis($lachesisConfig, $data));
-        }
+        $adapter->setProfiler(new Lachesis($lachesisConfig, $data));
 
         return $adapter;
     }
