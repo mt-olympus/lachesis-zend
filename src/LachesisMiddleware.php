@@ -22,7 +22,9 @@ class LachesisMiddleware
      */
     public function __invoke(Request $request, Response $response, callable $next = null)
     {
-        $this->lachesis->setRequest($request);
+        if ($this->lachesis instanceof Lachesis) {
+            $this->lachesis->setRequest($request);
+        }
         return $next($request, $response);
     }
 }
