@@ -18,10 +18,12 @@ class Lachesis extends ZendProfiler
     private $data;
     private $extra;
     private $apiKey = 0;
+    private $debug = false;
 
     public function __construct(array $config, $extra = [])
     {
         $this->enabled = $config['enabled'] ?? true;
+        $this->debug = $config['debug'] ?? false;
         $this->apiKey = $config['api_key'] ?? 0;
 
         $this->logDir = $config['log_dir'] ?? 'data/kharon/lachesis';
@@ -75,7 +77,9 @@ class Lachesis extends ZendProfiler
                 $data['parameters'] = $profile['parameters'];
             }
         }
-        $data['stack'] = debug_backtrace();
+        if ($this->debug) {
+            $data['stack'] = debug_backtrace();
+        }
 
         $logFile = !empty($this->logFile) ? $this->logFile : $this->logDir . '/sql-' . getmypid() . '-' . microtime(true) . '.kharon';
         file_put_contents($logFile, json_encode($data, null, 100) . PHP_EOL);

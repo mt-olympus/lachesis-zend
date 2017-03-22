@@ -18,6 +18,7 @@ class Factory implements FactoryInterface
         $lachesisConfig['log_dir'] = $lachesisConfig['log_dir'] ?? 'data/kharon/lachesis';
         $lachesisConfig['log_file'] = $lachesisConfig['log_file'] ?? null;
         $enabled = $config['lachesis']['enabled'] ?? false;
+        $debug = $config['lachesis']['debug'] ?? false;
 
         $adapter = new Adapter($config['db'] ?? []);
         if ($enabled == false) {
