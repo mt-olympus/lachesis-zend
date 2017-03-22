@@ -11,15 +11,13 @@ class Factory implements FactoryInterface
     {
         $config = $container->get('config');
 
-
         $lachesisConfig = isset($config['lachesis']) ? $config['lachesis'] : [
             'enabled' => false,
         ];
-        if (!isset($lachesisConfig['log_dir'])) {
-            $lachesisConfig['log_dir'] = 'data/kharon/lachesis';
-        }
 
-        $enabled = isset($config['lachesis']['enabled']) ? (bool) $config['lachesis']['enabled'] : false;
+        $lachesisConfig['log_dir'] = $lachesisConfig['log_dir'] ?? 'data/kharon/lachesis';
+        $lachesisConfig['log_file'] = $lachesisConfig['log_file'] ?? null;
+        $enabled = $config['lachesis']['enabled'] ?? false;
 
         $adapter = new Adapter($config['db'] ?? []);
         if ($enabled == false) {
