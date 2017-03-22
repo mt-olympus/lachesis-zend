@@ -14,18 +14,18 @@ class Lachesis extends ZendProfiler
 
     private $enabled;
     private $logDir = 'data/kharon/lachesis';
+    private $logFile = null;
     private $data;
     private $extra;
     private $apiKey = 0;
 
-    public function __construct($config, $extra = [])
+    public function __construct(array $config, $extra = [])
     {
-        $this->enabled = isset($config['enabled']) ? (bool) $config['enabled'] : true;
-        $this->apiKey = isset($config['api_key']) ? (string) $config['api_key'] : 0;
+        $this->enabled = $config['enabled'] ?? true;
+        $this->apiKey = $config['api_key'] ?? 0;
 
-        if (isset($config['log_dir'])) {
-            $this->logDir = $config['log_dir'];
-        }
+        $this->logDir = $config['log_dir'] ?? 'data/kharon/lachesis';
+        $this->logFile = $config['log_file'] ?? null;
 
         if (!empty($extra)) {
             $this->extra = $extra;
@@ -34,6 +34,10 @@ class Lachesis extends ZendProfiler
 
     public function profilerFinish()
     {
+        if ($this->enabled == false) {
+            return;
+        }
+
         $ret = parent::profilerFinish();
         $profile = $ret->getLastProfile();
         switch (strtolower(substr(ltrim($profile['sql']), 0, 6))) {
@@ -73,7 +77,7 @@ class Lachesis extends ZendProfiler
         }
         $data['stack'] = debug_backtrace();
 
-        $logFile = $this->logDir . '/sql-' . getmypid() . '-' . microtime(true) . '.kharon';
-        file_put_contents($logFile, json_encode($data, null, 100));
+        $logFile = !empty($this->logFile) ? $this->logFile : $this->logDir . '/sql-' . getmypid() . '-' . microtime(true) . '.kharon';
+        file_put_contents($logFile, json_encode($data, null, 100) . PHP_EOL);
     }
 }
