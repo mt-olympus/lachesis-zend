@@ -25,33 +25,8 @@ class Factory implements FactoryInterface
             return $adapter;
         }
 
-        $data = [];
-        if ($container->has('Request')) {
-            $data = $this->prepareData($container->get('Request'));
-        }
-        $adapter->setProfiler(new Lachesis($lachesisConfig, $data));
+        $adapter->setProfiler(new Lachesis($lachesisConfig));
 
         return $adapter;
-    }
-
-    private function prepareData($request)
-    {
-        $data = [];
-
-        if (!method_exists($request, 'getHeader')) {
-            return $data;
-        }
-
-        $header = $request->getHeader('X-Request-Id');
-        if ($header) {
-            $requestId = $header->getFieldValue();
-            $data['request_id'] = $requestId;
-        }
-        $header = $request->getHeader('X-Request-Name');
-        if ($header) {
-            $requestName = $header->getFieldValue();
-            $data['request_name'] = $requestName;
-        }
-        return $data;
     }
 }

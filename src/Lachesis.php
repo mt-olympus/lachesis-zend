@@ -3,6 +3,7 @@ namespace Lachesis;
 
 use Zend\Db\Adapter\Profiler\Profiler as ZendProfiler;
 use Zend\Db\Adapter\ParameterContainer;
+use Psr\Http\Message\RequestInterface;
 
 class Lachesis extends ZendProfiler
 {
@@ -19,6 +20,7 @@ class Lachesis extends ZendProfiler
     private $extra;
     private $apiKey = 0;
     private $debug = false;
+    private $request;
 
     public function __construct(array $config, $extra = [])
     {
@@ -32,6 +34,26 @@ class Lachesis extends ZendProfiler
         if (!empty($extra)) {
             $this->extra = $extra;
         }
+    }
+
+    public function setRequest($request)
+    {
+        $this->request = $request;
+    }
+
+    public function importHeaders(RequestInterface $request)
+    {
+        $data = [];
+
+        $header = $request->getHeader('X-Request-Id');
+        if (count($header) > 0) {
+            $data['request_id'] = $header[0];
+        }
+        $header = $request->getHeader('X-Request-Name');
+        if (count($header) > 0) {
+            $data['request_name'] = $header[0];
+        }
+        return $data;
     }
 
     public function profilerFinish()
@@ -69,6 +91,9 @@ class Lachesis extends ZendProfiler
         ];
         if (!empty($this->extra)) {
             $data = array_merge($this->extra, $data);
+        }
+        if ($this->request !== null) {
+            $data = array_merge($this->importHeaders($this->request), $data);
         }
         if (isset($profile['parameters'])) {
             if ($profile['parameters'] instanceof ParameterContainer) {
