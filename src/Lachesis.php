@@ -107,6 +107,6 @@ class Lachesis extends ZendProfiler
         }
 
         $logFile = !empty($this->logFile) ? $this->logFile : $this->logDir . '/sql-' . getmypid() . '-' . microtime(true) . '.kharon';
-        file_put_contents($logFile, json_encode($data, null, 100) . PHP_EOL);
+        file_put_contents($logFile, json_encode($data, null, 100) . PHP_EOL, FILE_APPEND);
     }
 }
