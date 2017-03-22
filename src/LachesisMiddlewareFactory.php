@@ -1,5 +1,5 @@
 <?php
-namespace Kharon\Hermes;
+namespace Lachesis;
 
 use Interop\Container\ContainerInterface;
 use Zend\ServiceManager\FactoryInterface;
